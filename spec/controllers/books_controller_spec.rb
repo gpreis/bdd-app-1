@@ -63,4 +63,56 @@ RSpec.describe BooksController, type: :controller do
       end
     end
   end
+
+  describe "PATCH #update" do
+    let(:book) { FactoryBot.build_stubbed(:book) }
+
+    before do
+      allow(Book).to receive(:find).and_return(book)
+      allow(book).to receive(:update).and_return(true)
+    end
+
+    it "updates the book" do
+      patch :update, params: { id: book.id, book: { name: "New Name" } }
+
+      expect(book).to have_received(:update)
+    end
+
+    context "when the update succeds" do
+      it "redirects to the book page" do
+        patch :update, params: { id: book.id, book: { name: "New Name" } }
+
+        expect(response).to redirect_to(book_path(book))
+      end
+    end
+
+    context "when the updates fails" do
+      before { allow(book).to receive(:update).and_return(false) }
+
+      it "renders the edit page again" do
+        patch :update, params: { id: book.id, book: { name: "New Name" } }
+
+        expect(response).to render_template(:edit)
+      end
+    end
+
+    describe "DELETE #destroy" do
+      let(:book) { FactoryBot.build_stubbed(:book) }
+
+      before do
+        allow(Book).to receive(:find).and_return(book)
+        allow(book).to receive(:destroy)
+
+        delete :destroy, params: { id: book.id }
+      end
+
+      it "deletes the book" do
+        expect(book).to have_received(:destroy)
+      end
+
+      it "redirects to the index page" do
+        expect(response).to redirect_to(books_path)
+      end
+    end
+  end
 end
